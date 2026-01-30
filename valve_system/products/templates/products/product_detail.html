@@ -1,0 +1,23 @@
+<h2>{{ product.name }}</h2>
+<p>{{ product.description }}</p>
+
+<h3>技术文档</h3>
+<ul>
+
+        {% for doc in product.documents.all %}
+            <li>
+                {{ doc.title }}
+                {%if user.is_authenticated %}
+                    <a href="{{ doc.file.url }}" target="_blank">预览</a>
+                    <a href="{% url 'document_download' doc.id %}">下载</a>
+                {% else %}
+                    <p>请登录后查看相关文档</p>
+                {% endif %}
+            </li>
+        {% empty %}
+            <li>暂无相关文档</li>
+        {% endfor %}
+
+</ul>
+
+<a href="{% url 'product_list' %}">返回产品列表</a>
