@@ -1,23 +1,83 @@
-<h2>{{ product.name }}</h2>
-<p>{{ product.description }}</p>
+{% extends 'products/base.html' %}
 
-<h3>技术文档</h3>
-<ul>
 
-        {% for doc in product.documents.all %}
-            <li>
-                {{ doc.title }}
-                {%if user.is_authenticated %}
-                    <a href="{{ doc.file.url }}" target="_blank">预览</a>
-                    <a href="{% url 'document_download' doc.id %}">下载</a>
-                {% else %}
-                    <p>请登录后查看相关文档</p>
-                {% endif %}
-            </li>
-        {% empty %}
-            <li>暂无相关文档</li>
-        {% endfor %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">首页</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'product_list' %}">产品</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ product.series }}</li>
+    </ol>
+</nav>
 
-</ul>
+<div class="row">
+    <!-- Product Image -->
+    <div class="col-md-5 mb-4">
+        <div class="card border-0 shadow-sm p-3">
+            {% if product.thumbnail %}
+            <img src="{{ product.thumbnail.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+            {% else %}
+            <div class="d-flex align-items-center justify-content-center bg-light rounded" style="height: 400px;">
+                <i class="fas fa-cube fa-5x text-muted"></i>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 
-<a href="{% url 'product_list' %}">返回产品列表</a>
+    <!-- Product Info -->
+    <div class="col-md-7">
+        <h1 class="fw-bold mb-2">{{ product.series }}</h1>
+        <h4 class="text-muted mb-4">{{ product.name }}</h4>
+        <span class="badge bg-primary mb-3">{{ product.category.name|default:"General" }}</span>
+
+        <p class="lead">{{ product.description }}</p>
+
+        <h5 class="mt-5 mb-3 fw-bold border-bottom pb-2">技术参数</h5>
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <th scope="row" class="w-25">最大压力</th>
+                    <td>{{ product.max_pressure|default:"-" }} bar</td>
+                </tr>
+                <tr>
+                    <th scope="row">最大流量</th>
+                    <td>{{ product.max_flow|default:"-" }} l/min</td>
+                </tr>
+                <tr>
+                    <th scope="row">插孔</th>
+                    <td>{{ product.cavity|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">材料</th>
+                    <td>{{ product.material|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">应用</th>
+                    <td>{{ product.application|default:"-" }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h5 class="mt-5 mb-3 fw-bold border-bottom pb-2">下载中心</h5>
+        {% if product.documents.exists %}
+        <div class="list-group">
+            {% for doc in product.documents.all %}
+            <a href="{% url 'document_download' doc.id %}"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-file-pdf text-danger me-2"></i>
+                    {{ doc.title }} <span class="text-muted small">({{ doc.get_file_type_display }})</span>
+                    {% if doc.version %}
+                    <span class="badge bg-secondary ms-2">{{ doc.version }}</span>
+                    {% endif %}
+                </div>
+                <span class="badge bg-light text-dark"><i class="fas fa-download"></i></span>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted"><i class="fas fa-info-circle me-1"></i> 暂无相关文档。</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

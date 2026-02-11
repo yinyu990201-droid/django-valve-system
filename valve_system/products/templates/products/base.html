@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}阀门系统{% endblock %}</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link href="{% static 'products/css/style.css' %}" rel="stylesheet">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    {% include "products/partials/navbar.html" %}
+
+    <!-- Main Content Container containing Sidebar and Page Content -->
+    <div class="container-fluid px-4 py-4">
+        <div class="row">
+            <!-- Sidebar Column (Visible on all pages that extend this block structure, but customizable) -->
+            <div class="col-lg-2 col-md-3 d-none d-md-block category-sidebar">
+                {% block sidebar %}
+                {% include "products/partials/sidebar_nav_v2.html" %}
+                {% endblock %}
+            </div>
+
+            <!-- Main Content Column -->
+            <div class="col-lg-10 col-md-9">
+                <!-- Breadcrumbs can go here -->
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    {% include "products/partials/footer.html" %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

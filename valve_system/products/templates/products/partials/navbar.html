@@ -1,0 +1,38 @@
+<!-- Fixed Navbar with Top Search -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <i class="fas fa-industry me-2"></i>阀门系统
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <!-- Centered Search Bar -->
+            <form class="d-flex mx-auto search-bar" action="{% url 'product_list' %}" method="get">
+                <input class="form-control search-input" type="search" placeholder="搜索型号、系列或关键词..." name="search"
+                    aria-label="Search" value="{{ request.GET.search|default:'' }}">
+                <button class="btn search-btn" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link fw-medium" href="{% url 'home' %}">首页</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-medium" href="{% url 'product_list' %}">产品目录</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-medium" href="#">关于我们</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-medium" href="#">联系方式</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
