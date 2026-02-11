@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}产品目录 - Valve System{% endblock %}
+
+{% block content %}
+<div class='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+    <div class='flex flex-col md:flex-row gap-8'>
+        <!-- Sidebar Filters -->
+        <div class='w-full md:w-64 flex-shrink-0'>
+            <div class='bg-white shadow rounded-lg p-6'>
+                <h2 class='text-lg font-medium text-gray-900 mb-4'>筛选</h2>
+                
+                <form id='filter-form' hx-get='{% url 'product-list' %}' hx-target='#product-grid-container' hx-push-url='true'>
+                    
+                    <!-- Search -->
+                    <div class='mb-6'>
+                        <label for='search' class='block text-sm font-medium text-gray-700 mb-1'>搜索型号</label>
+                        <input type='text' name='q' id='search' value='{{ search_query }}'
+                               class='focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'
+                               placeholder='输入型号...'
+                               hx-trigger='keyup changed delay:500ms'>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class='mb-6'>
+                        <h3 class='text-sm font-medium text-gray-900 mb-2'>分类</h3>
+                        <div class='space-y-2 max-h-64 overflow-y-auto'>
+                            <div class='flex items-center'>
+                                <input id='cat-all' name='category' value='' type='radio' 
+                                       {% if not current_category %}checked{% endif %}
+                                       class='focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300'
+                                       onchange='this.form.requestSubmit()'>
+                                <label for='cat-all' class='ml-2 text-sm text-gray-700'>全部</label>
+                            </div>
+                            {% for cat in categories %}
+                                <div class='flex items-center'>
+                                    <input id='cat-{{ cat.slug }}' name='category' value='{{ cat.slug }}' type='radio'
+                                           {% if current_category == cat.slug %}checked{% endif %}
+                                           class='focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300'
+                                           onchange='this.form.requestSubmit()'>
+                                    <label for='cat-{{ cat.slug }}' class='ml-2 text-sm text-gray-700 font-medium'>{{ cat.name }}</label>
+                                </div>
+                                <!-- Subcategories -->
+                                {% if cat.children.all %}
+                                    <div class='ml-6 space-y-1'>
+                                        {% for sub in cat.children.all %}
+                                        <div class='flex items-center'>
+                                            <input id='cat-{{ sub.slug }}' name='category' value='{{ sub.slug }}' type='radio'
+                                                   {% if current_category == sub.slug %}checked{% endif %}
+                                                   class='focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300'
+                                                   onchange='this.form.requestSubmit()'>
+                                            <label for='cat-{{ sub.slug }}' class='ml-2 text-sm text-gray-600'>{{ sub.name }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Additional Filters -->
+                    <div class='mb-6'>
+                        <h3 class='text-sm font-medium text-gray-900 mb-2'>插孔标准</h3>
+                        <div class='space-y-2'>
+                             <div class='flex items-center'>
+                                <input id='cavity-t11a' name='cavity' value='T-11A' type='checkbox' class='focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300'>
+                                <label for='cavity-t11a' class='ml-2 text-sm text-gray-700'>T-11A</label>
+                            </div>
+                            <div class='flex items-center'>
+                                <input id='cavity-t13a' name='cavity' value='T-13A' type='checkbox' class='focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300'>
+                                <label for='cavity-t13a' class='ml-2 text-sm text-gray-700'>T-13A</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div class='flex-grow'>
+            <h1 class='text-2xl font-bold text-gray-900 mb-6'>产品列表</h1>
+            
+            <div id='product-grid-container'>
+                {% include 'products/components/product_grid.html' %}
+            </div>
+            
+            <!-- Loading Indicator -->
+            <div class='htmx-indicator flex justify-center py-4'>
+                 <svg class='animate-spin h-5 w-5 text-blue-600' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
+                    <circle class='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' stroke-width='4'></circle>
+                    <path class='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

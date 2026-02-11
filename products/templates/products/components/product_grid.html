@@ -1,0 +1,70 @@
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="product-grid">
+    {% for product in products %}
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div class="aspect-w-3 aspect-h-2 bg-gray-100 rounded-t-lg overflow-hidden">
+            {% if product.schematic_image %}
+            <img src="{{ product.schematic_image.url }}" alt="{{ product.model_code }}"
+                class="object-contain w-full h-full p-4">
+            {% else %}
+            <div class="flex items-center justify-center h-full text-gray-400">
+                <span class="text-xs">暂无图片</span>
+            </div>
+            {% endif %}
+        </div>
+        <div class="p-4">
+            <h3 class="text-lg font-bold text-gray-900">
+                <a href="{% url 'product-detail' product.pk %}" class="hover:text-blue-600">
+                    {{ product.model_code }}
+                </a>
+            </h3>
+            <p class="text-sm text-gray-500 mb-2">{{ product.series }}</p>
+            <p class="text-xs text-gray-600 line-clamp-2 h-8">{{ product.description }}</p>
+
+            <div class="mt-4 flex items-center justify-between">
+                <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {{ product.category.name }}
+                </span>
+                <a href="{% url 'product-detail' product.pk %}"
+                    class="text-sm font-medium text-blue-600 hover:text-blue-500">
+                    查看详情 &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full text-center py-12">
+        <p class="text-gray-500">未找到匹配的产品。</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="mt-8 flex justify-center">
+    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+        {% if page_obj.has_previous %}
+        <button hx-get="?page={{ page_obj.previous_page_number }}&category={{ current_category }}&q={{ search_query }}"
+            hx-target="#product-grid-container" hx-push-url="true"
+            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            <span class="sr-only">上一页</span>
+            &larr;
+        </button>
+        {% endif %}
+
+        <span
+            class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+            第 {{ page_obj.number }} 页 / 共 {{ page_obj.paginator.num_pages }} 页
+        </span>
+
+        {% if page_obj.has_next %}
+        <button hx-get="?page={{ page_obj.next_page_number }}&category={{ current_category }}&q={{ search_query }}"
+            hx-target="#product-grid-container" hx-push-url="true"
+            class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            <span class="sr-only">下一页</span>
+            &rarr;
+        </button>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}

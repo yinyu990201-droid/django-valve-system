@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.model_code }} - Valve System{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="md:flex md:items-center md:justify-between">
+            <div class="flex-1 min-w-0">
+                <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                    {{ product.model_code }}
+                </h2>
+                <p class="mt-1 text-sm text-gray-500">
+                    {{ product.series }} | {{ product.category.name }}
+                </p>
+            </div>
+            <div class="mt-4 flex md:mt-0 md:ml-4">
+                <button type="button"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                    下载数据表
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Sidebar Info -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white shadow rounded-lg p-6">
+                <!-- Image -->
+                <div class="aspect-w-4 aspect-h-3 bg-gray-100 rounded-lg overflow-hidden mb-6">
+                    {% if product.schematic_image %}
+                    <img src="{{ product.schematic_image.url }}" alt="Schematic"
+                        class="object-contain w-full h-full p-2">
+                    {% else %}
+                    <div class="flex items-center justify-center h-full text-gray-400">暂无图片</div>
+                    {% endif %}
+                </div>
+
+                <h3 class="text-lg font-medium text-gray-900 mb-4">关键参数</h3>
+                <dl class="space-y-3">
+                    <div class="flex justify-between">
+                        <dt class="text-sm font-medium text-gray-500">插孔</dt>
+                        <dd class="text-sm text-gray-900">{{ product.cavity }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-sm font-medium text-gray-500">材质</dt>
+                        <dd class="text-sm text-gray-900">{{ product.material }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Main Content (Tabs) -->
+        <div class="lg:col-span-2">
+            <div class="bg-white shadow rounded-lg overflow-hidden" x-data="{ tab: 'tech' }">
+                <!-- Tab Headers -->
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex" aria-label="Tabs">
+                        <button @click="tab = 'tech'"
+                            :class="{'border-blue-500 text-blue-600': tab === 'tech', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'tech'}"
+                            class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm">
+                            技术数据
+                        </button>
+                        <button @click="tab = 'curves'"
+                            :class="{'border-blue-500 text-blue-600': tab === 'curves', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'curves'}"
+                            class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm">
+                            性能曲线
+                        </button>
+                        <button @click="tab = 'desc'"
+                            :class="{'border-blue-500 text-blue-600': tab === 'desc', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'desc'}"
+                            class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm">
+                            描述
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="p-6">
+                    <!-- Technical Data -->
+                    <div x-show="tab === 'tech'">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">技术规格</h3>
+                        <div class="border-t border-gray-200">
+                            <dl>
+                                {% for key, value in product.specifications.items %}
+                                <div class="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 even:bg-white">
+                                    <dt class="text-sm font-medium text-gray-500 capitalize">{{ key }}</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ value }}</dd>
+                                </div>
+                                {% empty %}
+                                <p class="text-gray-500 text-sm">暂无详细规格数据。</p>
+                                {% endfor %}
+                            </dl>
+                        </div>
+                    </div>
+
+                    <!-- Performance Curves -->
+                    <div x-show="tab === 'curves'" x-cloak>
+                        {% for curve in performance_curves %}
+                        <div class="mb-8">
+                            <h4 class="text-md font-medium text-gray-800 mb-2">{{ curve.curve_type }}</h4>
+                            <div class="relative h-64 w-full">
+                                <canvas id="curveChart-{{ curve.id }}"></canvas>
+                            </div>
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    const ctx = document.getElementById('curveChart-{{ curve.id }}').getContext('2d');
+                                    const data = {{ curve.data_points| safe
+                                }};
+                                new Chart(ctx, {
+                                    type: 'line',
+                                    data: {
+                                        datasets: [{
+                                            label: '{{ curve.curve_type }}',
+                                            data: data,
+                                            borderColor: 'rgb(37, 99, 235)',
+                                            tension: 0.1,
+                                            fill: false
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        scales: {
+                                            x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Flow (gpm)' } },
+                                            y: { title: { display: true, text: 'Pressure Drop (psi)' } }
+                                        }
+                                    }
+                                });
+                                    });
+                            </script>
+                        </div>
+                        {% empty %}
+                        <p class="text-gray-500">暂无性能曲线数据。</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Description -->
+                    <div x-show="tab === 'desc'" x-cloak>
+                        <div class="prose max-w-none text-gray-500">
+                            <p>{{ product.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
