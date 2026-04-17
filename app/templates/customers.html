@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}客户档案 - 企业级插装阀资料管理平台{% endblock %}
+{% block content %}
+<div class="page-stack">
+  <section class="hero-panel fade-up">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Customer Records</span>
+        <h1 class="display-title">客户档案管理</h1>
+        <p>
+          统一管理客户基础信息，形成标准化的客户台账。当前版本聚焦最核心字段，后续可以继续叠加销售阶段、标签与业务记录。
+        </p>
+        <div class="hero-actions mt-4">
+          <span class="count-badge">当前共 {{ customers|length }} 条档案</span>
+          {% if current_user.is_admin %}
+          <a class="btn-app-secondary" href="{{ url_for('customer_new') }}">新增客户</a>
+          {% else %}
+          <span class="role-badge">只读模式：可查看，不能修改</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="surface-card surface-card--muted">
+        <span class="eyebrow eyebrow--accent">字段范围</span>
+        <div class="meta-list">
+          <div class="meta-item">
+            <strong>基础信息</strong>
+            <span>客户名称、联系人、电话、邮箱和备注，先满足最常见的内部管理需求。</span>
+          </div>
+          <div class="meta-item">
+            <strong>管理策略</strong>
+            <span>管理员负责新增、编辑和删除，普通用户仅保留查看权限。</span>
+          </div>
+          <div class="meta-item">
+            <strong>扩展方向</strong>
+            <span>可进一步增加地区、行业、意向项目、成交状态与负责人字段。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="table-shell fade-up delay-1">
+    <div class="table-header">
+      <div>
+        <h2 class="section-title mb-2">客户列表</h2>
+        <p class="table-caption">用于快速回顾客户联系人与沟通备注，作为后续业务协作的基础台账。</p>
+      </div>
+      {% if current_user.is_admin %}
+      <div class="table-actions">
+        <a class="btn-soft" href="{{ url_for('customer_new') }}">新增客户</a>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if customers %}
+    <div class="app-table-wrap">
+      <table class="table table-app align-middle">
+        <thead>
+          <tr>
+            <th>客户</th>
+            <th>联系人</th>
+            <th>联系方式</th>
+            <th>备注</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in customers %}
+          <tr>
+            <td class="primary-cell">
+              <strong>{{ c.name }}</strong>
+              <div class="sub-line">编号：#{{ c.id }}</div>
+            </td>
+            <td>
+              <div class="sub-line">{{ c.contact_person or '未填写联系人' }}</div>
+            </td>
+            <td>
+              <div class="sub-line">电话：{{ c.phone or '-' }}</div>
+              <div class="sub-line">邮箱：{{ c.email or '-' }}</div>
+            </td>
+            <td>
+              <div class="description-block">{{ c.notes or '暂无备注。' }}</div>
+            </td>
+            <td>
+              {% if current_user.is_admin %}
+              <div class="table-actions">
+                <a class="btn-soft" href="{{ url_for('customer_edit', customer_id=c.id) }}">编辑</a>
+                <form method="post" action="{{ url_for('customer_delete', customer_id=c.id) }}" class="d-inline" onsubmit="return confirm('确认删除该客户？');">
+                  <button class="btn-soft btn-soft-danger" type="submit">删除</button>
+                </form>
+              </div>
+              {% else %}
+              <span class="role-badge">仅查看</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <h3>还没有客户档案</h3>
+      <p>平台当前尚未沉淀客户信息。管理员可以先建立基础客户台账，后续再逐步补充业务记录。</p>
+      {% if current_user.is_admin %}
+      <a class="btn-app-secondary" href="{{ url_for('customer_new') }}">创建第一条客户档案</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

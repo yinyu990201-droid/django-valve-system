@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}{{ '编辑客户' if customer else '新增客户' }} - 企业级插装阀资料管理平台{% endblock %}
+{% block content %}
+<div class="page-stack">
+  <section class="hero-panel fade-up">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Customer Form</span>
+        <h1 class="display-title">{{ '编辑客户档案' if customer else '新增客户档案' }}</h1>
+        <p>
+          记录客户基础信息，形成可追踪、可复用的业务台账。当前表单围绕最常用字段设计，适合先搭建稳定的基础档案体系。
+        </p>
+      </div>
+      <div class="surface-card surface-card--muted">
+        <span class="eyebrow eyebrow--accent">填写建议</span>
+        <div class="meta-list">
+          <div class="meta-item">
+            <strong>客户名称保持正式一致</strong>
+            <span>尽量与合同、报价或 CRM 中的命名保持一致，减少重复建档。</span>
+          </div>
+          <div class="meta-item">
+            <strong>备注可记录阶段信息</strong>
+            <span>例如意向项目、近期需求、技术沟通重点，便于后续跟进。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="form-shell fade-up delay-1">
+    <div class="surface-card">
+      <span class="eyebrow">Record Details</span>
+      <h2 class="section-title">客户信息</h2>
+      <p class="section-intro">带 * 的字段为必填项，其余字段可按当前掌握的信息逐步完善。</p>
+
+      <form method="post" class="form-panel mt-4">
+        <div class="row g-3">
+          <div class="col-md-12">
+            <label class="form-label">客户名称 *</label>
+            <input name="name" class="form-control" required value="{{ customer.name if customer else '' }}" placeholder="请输入客户名称">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">联系人</label>
+            <input name="contact_person" class="form-control" value="{{ customer.contact_person if customer else '' }}" placeholder="请输入联系人">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">电话</label>
+            <input name="phone" class="form-control" value="{{ customer.phone if customer else '' }}" placeholder="请输入联系电话">
+          </div>
+          <div class="col-md-12">
+            <label class="form-label">邮箱</label>
+            <input name="email" class="form-control" value="{{ customer.email if customer else '' }}" placeholder="请输入邮箱地址">
+          </div>
+          <div class="col-md-12">
+            <label class="form-label">备注</label>
+            <textarea name="notes" class="form-control" rows="4" placeholder="记录项目需求、合作背景或其他跟进备注">{{ customer.notes if customer else '' }}</textarea>
+          </div>
+        </div>
+        <div class="section-actions mt-4">
+          <button class="btn-app-secondary" type="submit">保存档案</button>
+          <a class="btn-ghost" href="{{ url_for('customer_list') }}">返回客户列表</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="surface-card surface-card--muted">
+      <span class="eyebrow eyebrow--accent">字段用途</span>
+      <div class="hint-list mt-3">
+        <div class="hint-item">
+          <strong>联系人</strong>
+          <span>用于记录当前最主要的业务沟通对象，方便交接和复盘。</span>
+        </div>
+        <div class="hint-item">
+          <strong>联系方式</strong>
+          <span>建议优先填写最常使用的电话或邮箱，减少二次确认成本。</span>
+        </div>
+        <div class="hint-item">
+          <strong>备注</strong>
+          <span>适合记录项目阶段、关注产品线、特别要求和近期推进情况。</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+services:
+  valve:
+    build:
+      context: .
+    image: valve-doc-platform:latest
+    container_name: valve-doc-platform
+    env_file:
+      - .env
+    environment:
+      PORT: "8000"
+      SHOW_DEMO_CREDENTIALS: "false"
+      SESSION_COOKIE_SECURE: "false"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

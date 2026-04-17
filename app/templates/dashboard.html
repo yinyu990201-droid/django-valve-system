@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}总览 - 企业级插装阀资料管理平台{% endblock %}
+{% block content %}
+<div class="page-stack">
+  <section class="hero-panel fade-up">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Platform Overview</span>
+        <h1 class="display-title">欢迎回来，{{ current_user.username }}</h1>
+        <p>
+          当前平台围绕“资料管理、客户沉淀、角色权限”三件事展开，帮助团队把分散的 PDF 技术资料与客户信息集中到一个统一入口中。
+        </p>
+        <div class="hero-actions mt-4">
+          <a class="btn-app" href="{{ url_for('document_list') }}">进入资料库</a>
+          <a class="btn-soft" href="{{ url_for('customer_list') }}">查看客户档案</a>
+          {% if current_user.is_admin %}
+          <span class="role-badge">当前权限：管理员，可上传资料并维护客户</span>
+          {% else %}
+          <span class="role-badge">当前权限：普通用户，可查阅和下载资料</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="highlight-panel surface-card surface-card--muted">
+        <span class="eyebrow eyebrow--accent">运行状态</span>
+        <div class="panel-rows">
+          <div class="status-row">
+            <div>
+              <strong>资料中心</strong>
+              <span>已接入文档列表、在线预览与下载能力</span>
+            </div>
+            <span class="status-badge">{{ doc_count }} 份资料</span>
+          </div>
+          <div class="status-row">
+            <div>
+              <strong>客户档案</strong>
+              <span>支持基础客户信息维护与后续扩展</span>
+            </div>
+            <span class="status-badge">{{ customer_count }} 位客户</span>
+          </div>
+          <div class="status-row">
+            <div>
+              <strong>权限边界</strong>
+              <span>管理员与普通用户已按路由级别隔离</span>
+            </div>
+            <span class="status-badge">已启用</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stat-grid fade-up delay-1">
+    <div class="stat-tile">
+      <span class="tile-label">Documents</span>
+      <strong>{{ doc_count }}</strong>
+      <span>平台当前累计收录的 PDF 技术资料数量，可用于培训、售前与内部查询。</span>
+    </div>
+    <div class="stat-tile">
+      <span class="tile-label">Customers</span>
+      <strong>{{ customer_count }}</strong>
+      <span>已纳入系统的客户档案数量，便于后续跟进、复盘和资料关联。</span>
+    </div>
+  </section>
+
+  <section class="module-grid fade-up delay-2">
+    <div class="surface-card">
+      <span class="eyebrow">资料模块</span>
+      <h2 class="section-title">技术资料集中归档</h2>
+      <p class="section-intro">把插装阀相关 PDF 资料统一放进资料库，降低版本分散、资料丢失和口径不一致的风险。</p>
+      <div class="meta-list">
+        <div class="meta-item">
+          <strong>当前包含</strong>
+          <span>文档列表、上传入口、在线预览、下载与删除能力。</span>
+        </div>
+        <div class="meta-item">
+          <strong>适用场景</strong>
+          <span>内部知识沉淀、销售资料共享、工程设计参考与客户支持。</span>
+        </div>
+      </div>
+      <div class="section-actions mt-4">
+        <a class="btn-app" href="{{ url_for('document_list') }}">打开资料库</a>
+        {% if current_user.is_admin %}
+        <a class="btn-soft" href="{{ url_for('document_upload') }}">新增资料</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="surface-card">
+      <span class="eyebrow eyebrow--accent">客户模块</span>
+      <h2 class="section-title">客户档案基础台账</h2>
+      <p class="section-intro">统一记录客户名称、联系人、电话、邮箱与备注，为后续销售支持和资料关联打下结构化基础。</p>
+      <div class="meta-list">
+        <div class="meta-item">
+          <strong>当前包含</strong>
+          <span>客户列表、基础 CRUD 和只读访问模式。</span>
+        </div>
+        <div class="meta-item">
+          <strong>后续可扩展</strong>
+          <span>业务阶段、归属销售、标签分类、交互记录和审批流。</span>
+        </div>
+      </div>
+      <div class="section-actions mt-4">
+        <a class="btn-app-secondary" href="{{ url_for('customer_list') }}">进入客户档案</a>
+        {% if current_user.is_admin %}
+        <a class="btn-ghost" href="{{ url_for('customer_new') }}">新增客户</a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

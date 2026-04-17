@@ -1,0 +1,16 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.log
+.env
+data/app.db
+data/*.db
+data/*.db-journal
+data/uploads
+server.out.log
+server.err.log
+debug.log

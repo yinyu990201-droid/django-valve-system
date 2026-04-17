@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}上传资料 - 企业级插装阀资料管理平台{% endblock %}
+{% block content %}
+<div class="page-stack">
+  <section class="hero-panel fade-up">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Upload Workflow</span>
+        <h1 class="display-title">上传 PDF 资料</h1>
+        <p>
+          将产品说明书、选型手册、测试报告或交付文档统一沉淀到平台中，方便后续预览、下载与对外分发。
+        </p>
+        <div class="meta-list mt-4">
+          <div class="meta-item">
+            <strong>建议标题写法</strong>
+            <span>优先使用“产品型号 + 文档类型 + 版本/日期”的方式，方便后续检索和辨识。</span>
+          </div>
+          <div class="meta-item">
+            <strong>当前限制</strong>
+            <span>只允许上传 PDF 文件，上传后会保留原始文件名用于下载。</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="surface-card surface-card--muted">
+        <span class="eyebrow eyebrow--accent">上传建议</span>
+        <div class="meta-list">
+          <div class="meta-item">
+            <strong>描述信息尽量具体</strong>
+            <span>例如适用型号、应用场景、更新摘要或资料来源，便于团队快速判断内容价值。</span>
+          </div>
+          <div class="meta-item">
+            <strong>优先上传正式版本</strong>
+            <span>避免将临时草稿与正式资料混在一起，降低误用风险。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="form-shell fade-up delay-1">
+    <div class="surface-card">
+      <span class="eyebrow">Document Form</span>
+      <h2 class="section-title">资料信息</h2>
+      <p class="section-intro">提交后系统会保存 PDF 文件本体，并同步记录标题、描述和上传人信息。</p>
+
+      <form method="post" enctype="multipart/form-data" class="form-panel mt-4">
+        <div class="mb-3">
+          <label class="form-label">资料标题</label>
+          <input type="text" name="title" class="form-control" placeholder="例如：CV08 系列产品样本 2026 版" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">描述</label>
+          <textarea name="description" class="form-control" rows="4" placeholder="补充资料适用范围、版本说明或使用建议"></textarea>
+        </div>
+        <div class="mb-4">
+          <label class="form-label">PDF 文件</label>
+          <input type="file" name="pdf_file" accept="application/pdf" class="form-control" required>
+        </div>
+        <div class="section-actions">
+          <button class="btn-app" type="submit">确认上传</button>
+          <a class="btn-ghost" href="{{ url_for('document_list') }}">返回资料库</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="surface-card surface-card--muted">
+      <span class="eyebrow eyebrow--accent">提交后会发生什么</span>
+      <div class="hint-list mt-3">
+        <div class="hint-item">
+          <strong>文件保存到本地资料目录</strong>
+          <span>PDF 文件会被写入系统上传目录，并生成独立存储文件名。</span>
+        </div>
+        <div class="hint-item">
+          <strong>元数据写入系统数据库</strong>
+          <span>标题、描述、上传人和上传时间会同步记录，便于后续列表管理。</span>
+        </div>
+        <div class="hint-item">
+          <strong>立即可预览和下载</strong>
+          <span>上传成功后，团队成员可直接从资料库进入预览或下载流程。</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}登录 - 企业级插装阀资料管理平台{% endblock %}
+{% block body_class %}login-body{% endblock %}
+{% block content %}
+<section class="login-shell">
+  <div class="login-layout">
+    <div class="login-hero fade-up">
+      <span class="eyebrow">Enterprise Access</span>
+      <h1 class="display-title">把插装阀资料、客户档案和访问权限放在一个稳定入口里。</h1>
+      <p class="muted-copy">
+        这是一套面向企业内部使用的中文资料平台，聚焦 PDF 技术资料的集中管理、在线预览、客户档案留存，以及管理员与普通用户之间的权限隔离。
+      </p>
+      <div class="capability-list">
+        <div class="capability-item">
+          <strong>资料全生命周期管理</strong>
+          <span>支持上传、预览、下载和删除，帮助团队统一技术资料口径。</span>
+        </div>
+        <div class="capability-item">
+          <strong>角色化访问控制</strong>
+          <span>管理员可维护内容，普通用户专注查阅与获取，不再混用权限。</span>
+        </div>
+        <div class="capability-item">
+          <strong>客户信息沉淀</strong>
+          <span>把客户名称、联系人与业务备注结构化保存，为后续扩展打基础。</span>
+        </div>
+      </div>
+      {% if config.get('SHOW_DEMO_CREDENTIALS') %}
+      <div class="credential-panel">
+        <p>默认体验账号</p>
+        <div><code>admin / Admin@123</code></div>
+        <div><code>viewer / Viewer@123</code></div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="login-card fade-up delay-1">
+      <span class="eyebrow eyebrow--accent">Secure Sign In</span>
+      <h2 class="section-title">系统登录</h2>
+      <p class="section-intro">输入账号后即可进入资料总览。未登录用户无法访问业务页面。</p>
+
+      <form method="post" class="form-panel">
+        <div class="mb-3">
+          <label class="form-label">用户名</label>
+          <input type="text" name="username" class="form-control" placeholder="请输入用户名" required>
+        </div>
+        <div class="mb-4">
+          <label class="form-label">密码</label>
+          <input type="password" name="password" class="form-control" placeholder="请输入密码" required>
+        </div>
+        <button class="btn-app w-100" type="submit">进入平台</button>
+      </form>
+
+      <div class="hint-list">
+        <div class="hint-item">
+          <strong>适合企业内部部署</strong>
+          <span>页面、权限和资料能力均围绕内部资料协作场景设计。</span>
+        </div>
+        <div class="hint-item">
+          <strong>当前版本聚焦基础能力</strong>
+          <span>后续可继续扩展标签、审批流、全文检索和更完整的用户管理。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

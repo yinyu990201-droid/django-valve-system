@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}资料预览 - 企业级插装阀资料管理平台{% endblock %}
+{% block content %}
+<div class="page-stack">
+  <section class="hero-panel fade-up">
+    <div class="preview-meta">
+      <div>
+        <span class="eyebrow">Preview</span>
+        <h1 class="preview-title">{{ doc.title }}</h1>
+        <p class="muted-copy mb-0">{{ doc.description or '当前资料未填写补充说明。' }}</p>
+      </div>
+      <div class="meta-list" style="min-width: 280px;">
+        <div class="meta-item">
+          <strong>原始文件名</strong>
+          <span>{{ doc.original_filename }}</span>
+        </div>
+        <div class="meta-item">
+          <strong>上传时间</strong>
+          <span>{{ doc.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="section-actions">
+      <a class="btn-app" href="{{ url_for('document_download', doc_id=doc.id) }}">下载 PDF</a>
+      <a class="btn-ghost" href="{{ url_for('document_list') }}">返回资料库</a>
+    </div>
+  </section>
+
+  <section class="preview-shell fade-up delay-1">
+    <iframe src="{{ url_for('document_file', doc_id=doc.id) }}" class="pdf-frame" title="{{ doc.title }}"></iframe>
+  </section>
+</div>
+{% endblock %}

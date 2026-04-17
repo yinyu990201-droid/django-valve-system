@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}错误 {{ code }} - 企业级插装阀资料管理平台{% endblock %}
+{% block content %}
+<section class="error-shell fade-up">
+  <span class="eyebrow eyebrow--accent">System Response</span>
+  <div class="error-code">{{ code }}</div>
+  <h1 class="section-title">当前页面暂时无法访问</h1>
+  <p class="section-intro">{{ message }}</p>
+  <div class="section-actions justify-content-center mt-4">
+    {% if current_user.is_authenticated %}
+    <a class="btn-app" href="{{ url_for('dashboard') }}">返回总览</a>
+    {% else %}
+    <a class="btn-app" href="{{ url_for('login') }}">返回登录页</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
