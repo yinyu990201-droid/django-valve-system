@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% from '_symbol.html' import valve_symbol %}
-{% block title %}快速选型 - 企业级插装阀资料管理平台{% endblock %}
+{% block title %}解决方案 - 企业级插装阀资料管理平台{% endblock %}
 {% block content %}
 <div class="quick-page">
   <section class="quick-top">
     <div>
-      <span class="eyebrow">Quick Selection</span>
-      <h1 class="display-title">快速选型</h1>
+      <span class="eyebrow">Solutions</span>
+      <h1 class="display-title">解决方案</h1>
       <p class="section-intro">
-        按“当前问题区”的方式逐步收敛需求：先确定控制问题，再选择通口数、流量范围和压力等级，系统会即时给出候选型号。
+        按“当前问题区”的方式逐步收敛应用需求：先确定控制问题，再选择通口数、流量范围和压力等级，系统会给出可沟通的解决方案候选型号。
       </p>
     </div>
     <div class="selected-summary">
@@ -80,7 +80,7 @@
       <div class="table-header">
         <div>
           <span class="eyebrow eyebrow--accent">Candidates</span>
-          <h2 class="section-title">候选型号 {{ items|length }}/{{ total_count }}</h2>
+          <h2 class="section-title">方案候选 {{ items|length }}/{{ total_count }}</h2>
         </div>
         <a class="btn-soft" href="{{ url_for('catalog_index') }}">进入完整目录</a>
       </div>
@@ -96,7 +96,7 @@
         </a>
         {% else %}
         <div class="empty-state">
-          <h3>未找到候选型号</h3>
+          <h3>未找到方案候选</h3>
           <p>请减少问题条件，或回到完整目录使用更多维度筛选。</p>
         </div>
         {% endfor %}

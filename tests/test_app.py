@@ -60,7 +60,7 @@ class ValveAppTestCase(unittest.TestCase):
 
         quick = self.client.get("/quick-select?ports=3&flow=60-120")
         self.assertEqual(quick.status_code, 200)
-        self.assertIn("候选型号".encode("utf-8"), quick.data)
+        self.assertIn("方案候选".encode("utf-8"), quick.data)
 
     def test_catalog_pagination_preserves_filters(self):
         self.login()
