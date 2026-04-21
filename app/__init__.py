@@ -65,6 +65,7 @@ def create_app() -> Flask:
 
     with app.app_context():
         db.create_all()
+        models.ensure_document_model_code_column()
         models.ensure_default_admin()
 
     register_routes(app)

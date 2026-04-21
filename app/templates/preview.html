@@ -22,7 +22,11 @@
     </div>
     <div class="section-actions">
       <a class="btn-app" href="{{ url_for('document_download', doc_id=doc.id) }}">下载 PDF</a>
-      <a class="btn-ghost" href="{{ url_for('document_list') }}">返回资料库</a>
+      {% if doc.model_code %}
+      <a class="btn-ghost" href="{{ url_for('catalog_detail', model_code=doc.model_code) }}">返回型号明细</a>
+      {% else %}
+      <a class="btn-ghost" href="{{ url_for('catalog_index') }}">返回目录</a>
+      {% endif %}
     </div>
   </section>
 

@@ -12,10 +12,9 @@
         </p>
         <div class="hero-actions mt-4">
           <a class="btn-app" href="{{ url_for('catalog_index') }}">进入插装阀目录</a>
-          <a class="btn-soft" href="{{ url_for('document_list') }}">进入资料库</a>
           <a class="btn-soft" href="{{ url_for('customer_list') }}">查看客户档案</a>
           {% if current_user.is_admin %}
-          <span class="role-badge">当前权限：管理员，可上传资料并维护客户</span>
+          <span class="role-badge">当前权限：管理员，可在型号明细页上传PDF并维护客户</span>
           {% else %}
           <span class="role-badge">当前权限：普通用户，可查阅和下载资料</span>
           {% endif %}
@@ -35,7 +34,7 @@
           <div class="status-row">
             <div>
               <strong>资料中心</strong>
-              <span>已接入文档列表、在线预览与下载能力</span>
+              <span>PDF 资料已挂接到具体型号明细页，支持预览与下载</span>
             </div>
             <span class="status-badge">{{ doc_count }} 份资料</span>
           </div>
@@ -67,7 +66,7 @@
     <div class="stat-tile">
       <span class="tile-label">Documents</span>
       <strong>{{ doc_count }}</strong>
-      <span>平台当前累计收录的 PDF 技术资料数量，可用于培训、售前与内部查询。</span>
+      <span>平台当前累计挂接到型号明细页的 PDF 技术资料数量，可用于培训、售前与内部查询。</span>
     </div>
     <div class="stat-tile">
       <span class="tile-label">Customers</span>

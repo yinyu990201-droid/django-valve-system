@@ -4,6 +4,7 @@ import os
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import current_app
+from sqlalchemy import inspect, text
 
 from . import db, login_manager
 
@@ -28,6 +29,7 @@ class User(UserMixin, db.Model):
 
 class Document(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    model_code = db.Column(db.String(80), nullable=True, index=True)
     title = db.Column(db.String(200), nullable=False)
     original_filename = db.Column(db.String(255), nullable=False)
     stored_filename = db.Column(db.String(255), unique=True, nullable=False)
@@ -76,3 +78,14 @@ def ensure_default_admin() -> None:
         db.session.add(demo_user)
 
     db.session.commit()
+
+
+def ensure_document_model_code_column() -> None:
+    inspector = inspect(db.engine)
+    if "document" not in inspector.get_table_names():
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("document")}
+    if "model_code" not in columns:
+        with db.engine.begin() as connection:
+            connection.execute(text("ALTER TABLE document ADD COLUMN model_code VARCHAR(80)"))

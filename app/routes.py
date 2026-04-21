@@ -40,6 +40,44 @@ def admin_required(view_func):
     return wrapped
 
 
+def _validate_pdf_upload(file):
+    if not file or not file.filename:
+        flash("请上传 PDF 文件", "danger")
+        return None
+    if not file.filename.lower().endswith(".pdf"):
+        flash("仅支持 PDF 文件", "danger")
+        return None
+    return secure_filename(file.filename)
+
+
+def _create_document_from_request(model_code: str | None = None):
+    title = request.form.get("title", "").strip()
+    description = request.form.get("description", "").strip()
+    file = request.files.get("pdf_file")
+    original_name = _validate_pdf_upload(file)
+    if not original_name:
+        return None
+
+    if not title:
+        title = os.path.splitext(original_name)[0] or "PDF 资料"
+
+    stored_filename = f"{uuid.uuid4()}.pdf"
+    target_path = os.path.join(current_app.config["UPLOAD_DIR"], stored_filename)
+    file.save(target_path)
+
+    doc = Document(
+        model_code=model_code,
+        title=title,
+        original_filename=original_name,
+        stored_filename=stored_filename,
+        description=description,
+        uploaded_by=current_user.id,
+    )
+    db.session.add(doc)
+    db.session.commit()
+    return doc
+
+
 def register_routes(app):
     @app.route("/")
     def index():
@@ -124,13 +162,26 @@ def register_routes(app):
         item = get_catalog_item(model_code)
         if not item:
             abort(404)
+        docs = Document.query.filter_by(model_code=item.code).order_by(Document.created_at.desc()).all()
         related = [
             candidate
             for candidate in all_catalog_items()
             if candidate.code != item.code
             and (candidate.category == item.category or candidate.function == item.function)
         ][:4]
-        return render_template("catalog_detail.html", item=item, related=related)
+        return render_template("catalog_detail.html", item=item, related=related, docs=docs)
+
+    @app.route("/catalog/<model_code>/documents/upload", methods=["POST"])
+    @login_required
+    @admin_required
+    def catalog_document_upload(model_code: str):
+        item = get_catalog_item(model_code)
+        if not item:
+            abort(404)
+        doc = _create_document_from_request(model_code=item.code)
+        if doc:
+            flash("型号资料上传成功", "success")
+        return redirect(url_for("catalog_detail", model_code=item.code))
 
     @app.route("/quick-select")
     @login_required
@@ -171,46 +222,25 @@ def register_routes(app):
     @app.route("/documents")
     @login_required
     def document_list():
-        docs = Document.query.order_by(Document.created_at.desc()).all()
-        return render_template("documents.html", docs=docs)
+        flash("PDF 资料已整合到各型号明细页，请先选择插装阀型号。", "warning")
+        return redirect(url_for("catalog_index"))
 
     @app.route("/documents/upload", methods=["GET", "POST"])
     @login_required
     @admin_required
     def document_upload():
         if request.method == "POST":
-            title = request.form.get("title", "").strip()
-            description = request.form.get("description", "").strip()
-            file = request.files.get("pdf_file")
+            model_code = request.form.get("model_code", "").strip().upper()
+            item = get_catalog_item(model_code) if model_code else None
+            doc = _create_document_from_request(model_code=item.code if item else None)
+            if doc:
+                flash("资料上传成功", "success")
+                if item:
+                    return redirect(url_for("catalog_detail", model_code=item.code))
+            return redirect(url_for("catalog_index"))
 
-            if not title:
-                flash("资料标题不能为空", "danger")
-                return render_template("upload.html")
-            if not file or not file.filename:
-                flash("请上传 PDF 文件", "danger")
-                return render_template("upload.html")
-            if not file.filename.lower().endswith(".pdf"):
-                flash("仅支持 PDF 文件", "danger")
-                return render_template("upload.html")
-
-            original_name = secure_filename(file.filename)
-            stored_filename = f"{uuid.uuid4()}.pdf"
-            target_path = os.path.join(current_app.config["UPLOAD_DIR"], stored_filename)
-            file.save(target_path)
-
-            doc = Document(
-                title=title,
-                original_filename=original_name,
-                stored_filename=stored_filename,
-                description=description,
-                uploaded_by=current_user.id,
-            )
-            db.session.add(doc)
-            db.session.commit()
-            flash("资料上传成功", "success")
-            return redirect(url_for("document_list"))
-
-        return render_template("upload.html")
+        flash("请进入具体型号明细页上传 PDF 资料。", "warning")
+        return redirect(url_for("catalog_index"))
 
     @app.route("/documents/<int:doc_id>/preview")
     @login_required
@@ -239,12 +269,15 @@ def register_routes(app):
     @admin_required
     def document_delete(doc_id: int):
         doc = Document.query.get_or_404(doc_id)
+        model_code = doc.model_code
         if os.path.exists(doc.full_path):
             os.remove(doc.full_path)
         db.session.delete(doc)
         db.session.commit()
         flash("资料已删除", "success")
-        return redirect(url_for("document_list"))
+        if model_code:
+            return redirect(url_for("catalog_detail", model_code=model_code))
+        return redirect(url_for("catalog_index"))
 
     @app.route("/customers")
     @login_required

@@ -882,6 +882,7 @@ textarea:focus,
 .related-grid,
 .replacement-grid,
 .candidate-list,
+.material-list,
 .stat-grid,
 .feature-grid,
 .module-grid,
@@ -908,6 +909,64 @@ textarea:focus,
   border-radius: var(--radius-sm);
   background: var(--surface);
   text-decoration: none;
+}
+
+.material-panel {
+  padding: 22px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.detail-upload-form {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(180px, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+}
+
+.detail-upload-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.detail-upload-form label span,
+.material-card small {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.material-list {
+  margin-top: 12px;
+}
+
+.material-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+
+.material-card strong,
+.material-card span,
+.material-card small {
+  display: block;
+}
+
+.material-card span {
+  margin-top: 4px;
+  color: var(--ink-soft);
 }
 
 .related-card {
@@ -1196,7 +1255,9 @@ textarea:focus,
   .feature-grid,
   .module-grid,
   .quick-grid,
-  .spec-grid {
+  .spec-grid,
+  .detail-upload-form,
+  .material-card {
     grid-template-columns: 1fr;
   }
 }

@@ -85,10 +85,10 @@ class ValveAppTestCase(unittest.TestCase):
         self.assertIn("RPEP-25".encode("utf-8"), contact.data)
         self.assertIn("RPEI".encode("utf-8"), contact.data)
 
-    def test_document_upload_still_works_for_admin(self):
+    def test_model_detail_pdf_upload_and_download_work_for_admin(self):
         self.login()
         response = self.client.post(
-            "/documents/upload",
+            "/catalog/RPEP-25/documents/upload",
             data={
                 "title": "测试 PDF 资料",
                 "description": "功能测试上传",
@@ -98,11 +98,27 @@ class ValveAppTestCase(unittest.TestCase):
             follow_redirects=False,
         )
         self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith("/catalog/RPEP-25"))
 
         with self.app.app_context():
             doc = Document.query.filter_by(title="测试 PDF 资料").first()
             self.assertIsNotNone(doc)
+            self.assertEqual(doc.model_code, "RPEP-25")
             self.assertTrue(os.path.exists(doc.full_path))
+            doc_id = doc.id
+
+        detail = self.client.get("/catalog/RPEP-25")
+        self.assertIn("测试 PDF 资料".encode("utf-8"), detail.data)
+        self.assertIn("下载最新PDF".encode("utf-8"), detail.data)
+
+        download = self.client.get(f"/documents/{doc_id}/download")
+        self.assertEqual(download.status_code, 200)
+        download.close()
+
+    def test_document_standalone_pages_redirect_to_catalog(self):
+        self.login()
+        self.assertEqual(self.client.get("/documents").status_code, 302)
+        self.assertEqual(self.client.get("/documents/upload").status_code, 302)
 
     def test_viewer_cannot_open_admin_pages(self):
         self.login("viewer", "Viewer@123")
