@@ -13,7 +13,7 @@
     </div>
     <div class="hero-metrics">
       <div>
-        <strong>{{ items|length }}</strong>
+        <strong>{{ total_filtered }}</strong>
         <span>当前结果</span>
       </div>
       <div>
@@ -29,6 +29,11 @@
       <span>搜索型号/说明</span>
       <input name="q" value="{{ query }}" placeholder="例如 RPEP、T-10A、溢流、FLeX">
     </label>
+    {% for group, values in selected.items() %}
+      {% for value in values %}
+      <input type="hidden" name="{{ group }}" value="{{ value }}">
+      {% endfor %}
+    {% endfor %}
     <label class="sort-box">
       <span>排序</span>
       <select name="sort">
@@ -39,6 +44,7 @@
         <option value="cavity" {% if request.args.get('sort') == 'cavity' %}selected{% endif %}>按插孔</option>
       </select>
     </label>
+    <input type="hidden" name="page" value="1">
     <button class="btn-app" type="submit">更新结果</button>
     <a class="btn-ghost" href="{{ url_for('catalog_index') }}">清空筛选</a>
   </form>
@@ -51,19 +57,30 @@
       </div>
       <form method="get" action="{{ url_for('catalog_index') }}" class="filter-form">
         <input type="hidden" name="q" value="{{ query }}">
+        <input type="hidden" name="sort" value="{{ request.args.get('sort', 'default') }}">
+        <input type="hidden" name="page" value="1">
+        <div class="filter-action-bar">
+          <button class="btn-app w-100" type="submit">应用筛选</button>
+          <a class="btn-ghost w-100" href="{{ url_for('catalog_index') }}">重置</a>
+        </div>
         {% for group, title in [('category', '功能分类'), ('function', '控制问题'), ('flow', '流量范围'), ('pressure', '压力等级'), ('ports', '通口数'), ('cavity', '插孔型号'), ('tag', '结构特征')] %}
-        <fieldset class="filter-group">
-          <legend>{{ title }}</legend>
+        <details class="filter-group" {% if selected[group] or loop.index <= 2 %}open{% endif %}>
+          <summary>
+            <span>{{ title }}</span>
+            {% if selected[group] %}
+            <em>{{ selected[group]|length }}</em>
+            {% endif %}
+          </summary>
+          <div class="filter-option-list">
           {% for value in facets[group] %}
           <label class="filter-option">
             <input type="checkbox" name="{{ group }}" value="{{ value }}" {% if value in selected[group] %}checked{% endif %}>
             <span>{{ selected_label(group, value) }}</span>
           </label>
           {% endfor %}
-        </fieldset>
+          </div>
+        </details>
         {% endfor %}
-        <button class="btn-app w-100" type="submit">应用筛选</button>
-        <a class="btn-ghost w-100" href="{{ url_for('catalog_index') }}">重置</a>
       </form>
     </aside>
 
@@ -103,7 +120,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for item in items %}
+            {% for item in page_items %}
             <tr>
               <td>
                 <div class="model-cell">
@@ -135,6 +152,22 @@
           </tbody>
         </table>
       </div>
+      <nav class="pagination-bar" aria-label="产品分页">
+        <div class="pagination-info">
+          第 {{ page }} / {{ total_pages }} 页，每页 {{ per_page }} 条，共 {{ total_filtered }} 条结果
+        </div>
+        <div class="pagination-links">
+          <a class="page-link {% if page == 1 %}disabled{% endif %}" href="{{ page_url(page - 1) if page > 1 else '#' }}">上一页</a>
+          {% for page_no in range(1, total_pages + 1) %}
+            {% if page_no == 1 or page_no == total_pages or (page_no >= page - 1 and page_no <= page + 1) %}
+            <a class="page-link {% if page_no == page %}active{% endif %}" href="{{ page_url(page_no) }}">{{ page_no }}</a>
+            {% elif page_no == page - 2 or page_no == page + 2 %}
+            <span class="page-ellipsis">...</span>
+            {% endif %}
+          {% endfor %}
+          <a class="page-link {% if page == total_pages %}disabled{% endif %}" href="{{ page_url(page + 1) if page < total_pages else '#' }}">下一页</a>
+        </div>
+      </nav>
       {% else %}
       <div class="empty-state">
         <h3>没有匹配的型号</h3>

@@ -1,6 +1,8 @@
 import os
 import uuid
 from functools import wraps
+from math import ceil
+from urllib.parse import urlencode
 
 from flask import (
     abort,
@@ -82,9 +84,26 @@ def register_routes(app):
     def catalog_index():
         items, selected, query = filter_catalog(request.args)
         facets = facet_values()
+        per_page = 6
+        try:
+            page = max(int(request.args.get("page", "1")), 1)
+        except ValueError:
+            page = 1
+        total_filtered = len(items)
+        total_pages = max(ceil(total_filtered / per_page), 1)
+        page = min(page, total_pages)
+        start = (page - 1) * per_page
+        page_items = items[start : start + per_page]
+
+        def page_url(target_page: int) -> str:
+            args = request.args.to_dict(flat=False)
+            args["page"] = [str(target_page)]
+            return f"{url_for('catalog_index')}?{urlencode(args, doseq=True)}"
+
         return render_template(
             "catalog.html",
             items=items,
+            page_items=page_items,
             facets=facets,
             selected=selected,
             selected_label=selected_label,
@@ -92,6 +111,11 @@ def register_routes(app):
             flow_labels=FLOW_BUCKET_LABELS,
             pressure_labels=PRESSURE_BUCKET_LABELS,
             total_count=len(all_catalog_items()),
+            page=page,
+            per_page=per_page,
+            total_pages=total_pages,
+            total_filtered=total_filtered,
+            page_url=page_url,
         )
 
     @app.route("/catalog/<model_code>")

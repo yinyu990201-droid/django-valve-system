@@ -52,6 +52,7 @@ class ValveAppTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("RPEP-25".encode("utf-8"), response.data)
         self.assertIn("RDDA-80".encode("utf-8"), response.data)
+        self.assertIn("应用筛选".encode("utf-8"), response.data)
 
         detail = self.client.get("/catalog/RPEP-25")
         self.assertEqual(detail.status_code, 200)
@@ -60,6 +61,18 @@ class ValveAppTestCase(unittest.TestCase):
         quick = self.client.get("/quick-select?ports=3&flow=60-120")
         self.assertEqual(quick.status_code, 200)
         self.assertIn("候选型号".encode("utf-8"), quick.data)
+
+    def test_catalog_pagination_preserves_filters(self):
+        self.login()
+        first_page = self.client.get("/catalog")
+        self.assertEqual(first_page.status_code, 200)
+        self.assertIn("第 1 / 2 页".encode("utf-8"), first_page.data)
+        self.assertIn("page=2".encode("utf-8"), first_page.data)
+
+        second_page = self.client.get("/catalog?page=2&sort=model")
+        self.assertEqual(second_page.status_code, 200)
+        self.assertIn("第 2 / 2 页".encode("utf-8"), second_page.data)
+        self.assertIn("sort=model".encode("utf-8"), second_page.data)
 
     def test_cross_reference_and_contact_prefill(self):
         self.login()
