@@ -16,6 +16,15 @@ from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.utils import secure_filename
 
 from . import db
+from .catalog import (
+    FLOW_BUCKET_LABELS,
+    PRESSURE_BUCKET_LABELS,
+    all_catalog_items,
+    facet_values,
+    filter_catalog,
+    get_catalog_item,
+    selected_label,
+)
 from .models import Customer, Document, User
 
 
@@ -33,7 +42,7 @@ def register_routes(app):
     @app.route("/")
     def index():
         if current_user.is_authenticated:
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("catalog_index"))
         return redirect(url_for("login"))
 
     @app.route("/login", methods=["GET", "POST"])
@@ -44,7 +53,8 @@ def register_routes(app):
             user = User.query.filter_by(username=username).first()
             if user and user.check_password(password):
                 login_user(user)
-                return redirect(url_for("dashboard"))
+                next_url = request.args.get("next")
+                return redirect(next_url or url_for("catalog_index"))
             flash("用户名或密码错误", "danger")
         return render_template("login.html")
 
@@ -59,7 +69,80 @@ def register_routes(app):
     def dashboard():
         doc_count = Document.query.count()
         customer_count = Customer.query.count()
-        return render_template("dashboard.html", doc_count=doc_count, customer_count=customer_count)
+        model_count = len(all_catalog_items())
+        return render_template(
+            "dashboard.html",
+            doc_count=doc_count,
+            customer_count=customer_count,
+            model_count=model_count,
+        )
+
+    @app.route("/catalog")
+    @login_required
+    def catalog_index():
+        items, selected, query = filter_catalog(request.args)
+        facets = facet_values()
+        return render_template(
+            "catalog.html",
+            items=items,
+            facets=facets,
+            selected=selected,
+            selected_label=selected_label,
+            query=query,
+            flow_labels=FLOW_BUCKET_LABELS,
+            pressure_labels=PRESSURE_BUCKET_LABELS,
+            total_count=len(all_catalog_items()),
+        )
+
+    @app.route("/catalog/<model_code>")
+    @login_required
+    def catalog_detail(model_code: str):
+        item = get_catalog_item(model_code)
+        if not item:
+            abort(404)
+        related = [
+            candidate
+            for candidate in all_catalog_items()
+            if candidate.code != item.code
+            and (candidate.category == item.category or candidate.function == item.function)
+        ][:4]
+        return render_template("catalog_detail.html", item=item, related=related)
+
+    @app.route("/quick-select")
+    @login_required
+    def quick_select():
+        items, selected, query = filter_catalog(request.args)
+        return render_template(
+            "quick_select.html",
+            items=items,
+            selected=selected,
+            selected_label=selected_label,
+            query=query,
+            flow_labels=FLOW_BUCKET_LABELS,
+            pressure_labels=PRESSURE_BUCKET_LABELS,
+            categories=facet_values()["category"],
+            functions=facet_values()["function"],
+            total_count=len(all_catalog_items()),
+        )
+
+    @app.route("/sun-replacement")
+    @login_required
+    def sun_replacement():
+        items, selected, query = filter_catalog(request.args)
+        return render_template(
+            "sun_replacement.html",
+            items=items,
+            selected=selected,
+            query=query,
+            total_count=len(all_catalog_items()),
+        )
+
+    @app.route("/contact")
+    @login_required
+    def contact_quote():
+        model_code = request.args.get("model", "").strip().upper()
+        item = get_catalog_item(model_code) if model_code else None
+        return render_template("contact.html", item=item)
 
     @app.route("/documents")
     @login_required

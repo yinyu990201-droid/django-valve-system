@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% from '_symbol.html' import valve_symbol %}
+{% block title %}SUN型号替代 - 企业级插装阀资料管理平台{% endblock %}
+{% block content %}
+<div class="page-stack">
+  <section class="catalog-hero">
+    <div>
+      <span class="eyebrow">Cross Reference</span>
+      <h1 class="display-title">SUN型号替代</h1>
+      <p class="section-intro">
+        以 SUN 参考型号、本平台型号和插孔型号进行交叉查询，帮助销售与工程团队快速定位可沟通的替代候选。
+      </p>
+    </div>
+    <form class="replacement-search" method="get" action="{{ url_for('sun_replacement') }}">
+      <label>
+        <span>查询型号</span>
+        <input name="q" value="{{ query }}" placeholder="例如 RPEI、DTAF、T-13A">
+      </label>
+      <button class="btn-app" type="submit">查询</button>
+      <a class="btn-ghost" href="{{ url_for('sun_replacement') }}">全部</a>
+    </form>
+  </section>
+
+  <section class="result-panel">
+    <div class="result-head">
+      <div>
+        <span class="eyebrow eyebrow--accent">Matched Models</span>
+        <h2 class="section-title">替代表</h2>
+      </div>
+      <span class="count-badge">当前 {{ items|length }}/{{ total_count }} 条</span>
+    </div>
+    <div class="replacement-grid">
+      {% for item in items %}
+      <article class="replacement-card">
+        {{ valve_symbol(item, 'small') }}
+        <div>
+          <span>本平台型号</span>
+          <strong>{{ item.code }}</strong>
+        </div>
+        <div>
+          <span>SUN参考型号</span>
+          <strong>{{ item.sun_code }}</strong>
+        </div>
+        <p>{{ item.replacement_note }}</p>
+        <div class="tag-row">
+          <span>{{ item.cavity }}</span>
+          <span>{{ item.flow_lpm }} L/min</span>
+          <span>{{ item.pressure_bar }} bar</span>
+        </div>
+        <div class="section-actions">
+          <a class="btn-soft" href="{{ url_for('catalog_detail', model_code=item.code) }}">查看明细</a>
+          <a class="btn-ghost" href="{{ url_for('contact_quote', model=item.code) }}">询价</a>
+        </div>
+      </article>
+      {% else %}
+      <div class="empty-state">
+        <h3>没有匹配的替代型号</h3>
+        <p>可尝试输入更短的型号前缀或直接搜索插孔型号。</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

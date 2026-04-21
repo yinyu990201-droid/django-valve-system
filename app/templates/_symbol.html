@@ -1,0 +1,43 @@
+{% macro valve_symbol(item, size='normal') %}
+<div class="symbol-card symbol-card--{{ size }}" aria-label="{{ item.code }} 液压符号示意">
+  <svg viewBox="0 0 150 110" role="img">
+    <title>{{ item.code }} hydraulic symbol</title>
+    <rect x="34" y="30" width="82" height="52" rx="2" class="symbol-box"></rect>
+    {% if item.symbol in ['directional', 'spool'] %}
+    <line x1="34" y1="56" x2="116" y2="56" class="symbol-line"></line>
+    <path d="M50 70 L72 42 M78 42 L100 70" class="symbol-line"></path>
+    <path d="M62 42 L72 42 L70 52 M88 70 L100 70 L98 60" class="symbol-line"></path>
+    {% elif item.symbol == 'flow' %}
+    <path d="M42 66 H108" class="symbol-line"></path>
+    <path d="M58 72 L92 40" class="symbol-line"></path>
+    <path d="M74 72 L106 40" class="symbol-line symbol-soft"></path>
+    <circle cx="76" cy="56" r="14" class="symbol-circle"></circle>
+    {% elif item.symbol == 'priority' %}
+    <path d="M40 56 H112" class="symbol-line"></path>
+    <path d="M78 56 V86" class="symbol-line"></path>
+    <path d="M62 69 L91 43" class="symbol-line"></path>
+    <circle cx="78" cy="56" r="15" class="symbol-circle"></circle>
+    {% elif item.symbol == 'counterbalance' %}
+    <path d="M43 65 H106" class="symbol-line"></path>
+    <path d="M62 76 L88 36 L112 76 Z" class="symbol-line"></path>
+    <path d="M42 28 L108 84" class="symbol-line symbol-soft"></path>
+    {% elif item.symbol == 'check' %}
+    <path d="M42 56 H108" class="symbol-line"></path>
+    <path d="M64 36 L64 76 L94 56 Z" class="symbol-fill"></path>
+    <line x1="98" y1="36" x2="98" y2="76" class="symbol-line"></line>
+    {% else %}
+    <path d="M42 58 H108" class="symbol-line"></path>
+    <path d="M68 76 L88 36 L108 76" class="symbol-line"></path>
+    <path d="M56 33 L108 85" class="symbol-line symbol-soft"></path>
+    {% endif %}
+    <circle cx="34" cy="56" r="4" class="symbol-port"></circle>
+    <circle cx="116" cy="56" r="4" class="symbol-port"></circle>
+    {% if item.ports >= 3 %}
+    <circle cx="78" cy="82" r="4" class="symbol-port"></circle>
+    {% endif %}
+    {% if item.ports >= 4 %}
+    <circle cx="78" cy="30" r="4" class="symbol-port"></circle>
+    {% endif %}
+  </svg>
+</div>
+{% endmacro %}

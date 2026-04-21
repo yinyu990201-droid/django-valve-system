@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% from '_symbol.html' import valve_symbol %}
+{% block title %}快速选型 - 企业级插装阀资料管理平台{% endblock %}
+{% block content %}
+<div class="quick-page">
+  <section class="quick-top">
+    <div>
+      <span class="eyebrow">Quick Selection</span>
+      <h1 class="display-title">快速选型</h1>
+      <p class="section-intro">
+        按“当前问题区”的方式逐步收敛需求：先确定控制问题，再选择通口数、流量范围和压力等级，系统会即时给出候选型号。
+      </p>
+    </div>
+    <div class="selected-summary">
+      <strong>已选条件区</strong>
+      <span>当前已选问题/当前已选通口数/当前已选流量范围/当前已选压力等级</span>
+      <div class="active-filters">
+        {% for group, values in selected.items() %}
+          {% for value in values %}
+          <span>{{ selected_label(group, value) }}</span>
+          {% endfor %}
+        {% endfor %}
+        {% if not selected.category and not selected.function and not selected.ports and not selected.flow and not selected.pressure %}
+        <span>尚未选择</span>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <section class="quick-grid-panel">
+    <form method="get" action="{{ url_for('quick_select') }}" class="question-panel">
+      <h2>当前问题区</h2>
+      <label>
+        <span>问题一：你要解决什么问题？</span>
+        <select name="function">
+          <option value="">不确定</option>
+          {% for value in functions %}
+          <option value="{{ value }}" {% if value in selected.function %}selected{% endif %}>{{ value }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        <span>问题二：需要几通？</span>
+        <select name="ports">
+          <option value="">不确定</option>
+          <option value="2" {% if '2' in selected.ports %}selected{% endif %}>2 通</option>
+          <option value="3" {% if '3' in selected.ports %}selected{% endif %}>3 通</option>
+          <option value="4" {% if '4' in selected.ports %}selected{% endif %}>4 通</option>
+        </select>
+      </label>
+      <label>
+        <span>问题三：流量范围</span>
+        <select name="flow">
+          <option value="">不确定</option>
+          {% for value, label in flow_labels.items() %}
+          <option value="{{ value }}" {% if value in selected.flow %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        <span>问题四：最高系统压力</span>
+        <select name="pressure">
+          <option value="">不确定</option>
+          {% for value, label in pressure_labels.items() %}
+          <option value="{{ value }}" {% if value in selected.pressure %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        <span>关键词补充</span>
+        <input name="q" value="{{ query }}" placeholder="型号、插孔、FLeX、溢流">
+      </label>
+      <div class="section-actions">
+        <button class="btn-app" type="submit">生成候选</button>
+        <a class="btn-ghost" href="{{ url_for('quick_select') }}">重新选择</a>
+      </div>
+    </form>
+
+    <div class="quick-results">
+      <div class="table-header">
+        <div>
+          <span class="eyebrow eyebrow--accent">Candidates</span>
+          <h2 class="section-title">候选型号 {{ items|length }}/{{ total_count }}</h2>
+        </div>
+        <a class="btn-soft" href="{{ url_for('catalog_index') }}">进入完整目录</a>
+      </div>
+      <div class="candidate-list">
+        {% for item in items[:8] %}
+        <a class="candidate-card" href="{{ url_for('catalog_detail', model_code=item.code) }}">
+          {{ valve_symbol(item, 'small') }}
+          <div>
+            <strong>{{ item.code }}</strong>
+            <span>{{ item.title }}</span>
+            <small>{{ item.flow_lpm }} L/min · {{ item.pressure_bar }} bar · {{ item.cavity }}</small>
+          </div>
+        </a>
+        {% else %}
+        <div class="empty-state">
+          <h3>未找到候选型号</h3>
+          <p>请减少问题条件，或回到完整目录使用更多维度筛选。</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

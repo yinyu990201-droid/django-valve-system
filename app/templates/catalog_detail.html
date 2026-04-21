@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% from '_symbol.html' import valve_symbol %}
+{% block title %}{{ item.code }} 明细 - 企业级插装阀资料管理平台{% endblock %}
+{% block content %}
+<div class="detail-page">
+  <nav class="breadcrumb-line">
+    <a href="{{ url_for('catalog_index') }}">插装阀目录</a>
+    <span>/</span>
+    <span>{{ item.code }}</span>
+  </nav>
+
+  <section class="detail-hero">
+    <div class="detail-copy">
+      <span class="eyebrow">{{ item.category }}</span>
+      <h1 class="display-title">{{ item.code }}</h1>
+      <h2>{{ item.title }}</h2>
+      <p>{{ item.summary }}</p>
+      <div class="hero-actions mt-4">
+        <a class="btn-app" href="{{ url_for('contact_quote', model=item.code) }}">联系询价</a>
+        <a class="btn-soft" href="{{ url_for('sun_replacement', q=item.sun_code) }}">查看替代关系</a>
+        <a class="btn-ghost" href="{{ url_for('catalog_index') }}">返回目录</a>
+      </div>
+    </div>
+    <div class="detail-symbol">
+      {{ valve_symbol(item, 'large') }}
+      <div class="detail-code-row">
+        <span>本平台型号</span>
+        <strong>{{ item.code }}</strong>
+      </div>
+      <div class="detail-code-row">
+        <span>SUN 参考型号</span>
+        <strong>{{ item.sun_code }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-grid">
+    <div class="spec-card">
+      <span>功能分类</span>
+      <strong>{{ item.function }}</strong>
+    </div>
+    <div class="spec-card">
+      <span>通口数</span>
+      <strong>{{ item.ports }} 通</strong>
+    </div>
+    <div class="spec-card">
+      <span>额定流量</span>
+      <strong>{{ item.flow_lpm }} L/min</strong>
+    </div>
+    <div class="spec-card">
+      <span>最高系统压力</span>
+      <strong>{{ item.pressure_bar }} bar</strong>
+    </div>
+    <div class="spec-card">
+      <span>插孔型号</span>
+      <strong>{{ item.cavity }}</strong>
+    </div>
+    <div class="spec-card">
+      <span>结构特征</span>
+      <strong>{{ item.structure }}</strong>
+    </div>
+  </section>
+
+  <section class="detail-layout">
+    <div class="detail-section">
+      <span class="eyebrow">Product Notes</span>
+      <h2 class="section-title">型号说明</h2>
+      <p class="section-intro">{{ item.replacement_note }}</p>
+      <div class="detail-list">
+        {% for feature in item.features %}
+        <div>
+          <strong>{{ feature }}</strong>
+          <span>用于选型沟通时快速确认关键能力。</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <span class="eyebrow eyebrow--accent">Applications</span>
+      <h2 class="section-title">典型应用</h2>
+      <div class="tag-row tag-row--large">
+        {% for application in item.applications %}
+        <span>{{ application }}</span>
+        {% endfor %}
+      </div>
+      <div class="support-note mt-4">
+        明细页用于完成从目录筛选到询价沟通的闭环。正式替代选型应同时核对插孔、压力、流量、密封材质、线圈电压和电气接口。
+      </div>
+    </div>
+  </section>
+
+  {% if related %}
+  <section class="related-panel">
+    <div class="table-header">
+      <div>
+        <span class="eyebrow">Related</span>
+        <h2 class="section-title">相关型号</h2>
+      </div>
+      <a class="btn-ghost" href="{{ url_for('catalog_index', category=item.category) }}">查看同类</a>
+    </div>
+    <div class="related-grid">
+      {% for candidate in related %}
+      <a class="related-card" href="{{ url_for('catalog_detail', model_code=candidate.code) }}">
+        {{ valve_symbol(candidate, 'small') }}
+        <strong>{{ candidate.code }}</strong>
+        <span>{{ candidate.title }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}联系询价 - 企业级插装阀资料管理平台{% endblock %}
+{% block content %}
+<div class="contact-page">
+  <section class="detail-hero">
+    <div class="detail-copy">
+      <span class="eyebrow">Contact & Quote</span>
+      <h1 class="display-title">联系询价</h1>
+      <p>
+        把型号、工况、流量、压力和插孔信息整理成询价单，便于销售、工程和客户之间快速对齐。
+        {% if item %}当前已带入型号：<strong>{{ item.code }}</strong>。{% endif %}
+      </p>
+    </div>
+    <div class="selected-summary">
+      <strong>询价前建议确认</strong>
+      <span>目标型号 / SUN参考型号 / 插孔 / 流量 / 最高压力 / 密封材料 / 线圈电压</span>
+      {% if item %}
+      <div class="active-filters">
+        <span>{{ item.code }}</span>
+        <span>SUN {{ item.sun_code }}</span>
+        <span>{{ item.cavity }}</span>
+        <span>{{ item.flow_lpm }} L/min</span>
+        <span>{{ item.pressure_bar }} bar</span>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="contact-layout">
+    <form class="surface-card form-panel quote-form">
+      <span class="eyebrow">Quote Form</span>
+      <h2 class="section-title">询价信息</h2>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">目标型号</label>
+          <input class="form-control" value="{{ item.code if item else '' }}" placeholder="例如 RPEP-25">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">SUN 参考型号</label>
+          <input class="form-control" value="{{ item.sun_code if item else '' }}" placeholder="例如 RPEI">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">工作流量</label>
+          <input class="form-control" value="{{ item.flow_lpm ~ ' L/min' if item else '' }}" placeholder="例如 60 L/min">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">系统压力</label>
+          <input class="form-control" value="{{ item.pressure_bar ~ ' bar' if item else '' }}" placeholder="例如 350 bar">
+        </div>
+        <div class="col-md-12">
+          <label class="form-label">应用工况</label>
+          <textarea class="form-control" placeholder="描述设备类型、动作要求、控制方式和替代目标"></textarea>
+        </div>
+      </div>
+      <div class="support-note mt-4">
+        当前页面用于整理询价信息，正式发送可由企业后续接入邮件、CRM 或工单系统。现阶段不会写入数据库，也不会影响部署。
+      </div>
+    </form>
+
+    <div class="surface-card surface-card--muted">
+      <span class="eyebrow eyebrow--accent">Workflow</span>
+      <h2 class="section-title">沟通流程</h2>
+      <div class="detail-list">
+        <div>
+          <strong>1. 明确需求</strong>
+          <span>先通过目录或快速选型确定候选型号。</span>
+        </div>
+        <div>
+          <strong>2. 核对工况</strong>
+          <span>确认流量、压力、插孔、密封、电控接口和安装空间。</span>
+        </div>
+        <div>
+          <strong>3. 输出方案</strong>
+          <span>由工程人员确认替代可行性后再进入报价。</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

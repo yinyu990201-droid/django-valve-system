@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% from '_symbol.html' import valve_symbol %}
+{% block title %}插装阀目录 - 企业级插装阀资料管理平台{% endblock %}
+{% block content %}
+<div class="catalog-page">
+  <section class="catalog-hero">
+    <div>
+      <span class="eyebrow">Cartridge Catalog</span>
+      <h1 class="display-title">插装阀目录</h1>
+      <p class="section-intro">
+        以型号为入口组织插装阀资料，支持按功能分类、通口数、流量范围、最高压力和插孔型号快速筛选，并进入明细页查看替代关系和应用要点。
+      </p>
+    </div>
+    <div class="hero-metrics">
+      <div>
+        <strong>{{ items|length }}</strong>
+        <span>当前结果</span>
+      </div>
+      <div>
+        <strong>{{ total_count }}</strong>
+        <span>目录型号</span>
+      </div>
+      <a class="btn-app" href="{{ url_for('quick_select') }}">快速选型</a>
+    </div>
+  </section>
+
+  <form class="selected-strip" method="get" action="{{ url_for('catalog_index') }}">
+    <label class="search-box">
+      <span>搜索型号/说明</span>
+      <input name="q" value="{{ query }}" placeholder="例如 RPEP、T-10A、溢流、FLeX">
+    </label>
+    <label class="sort-box">
+      <span>排序</span>
+      <select name="sort">
+        <option value="default" {% if request.args.get('sort', 'default') == 'default' %}selected{% endif %}>默认顺序</option>
+        <option value="model" {% if request.args.get('sort') == 'model' %}selected{% endif %}>按型号</option>
+        <option value="flow" {% if request.args.get('sort') == 'flow' %}selected{% endif %}>按流量从高到低</option>
+        <option value="pressure" {% if request.args.get('sort') == 'pressure' %}selected{% endif %}>按压力从高到低</option>
+        <option value="cavity" {% if request.args.get('sort') == 'cavity' %}selected{% endif %}>按插孔</option>
+      </select>
+    </label>
+    <button class="btn-app" type="submit">更新结果</button>
+    <a class="btn-ghost" href="{{ url_for('catalog_index') }}">清空筛选</a>
+  </form>
+
+  <div class="catalog-layout">
+    <aside class="filter-rail">
+      <div class="filter-title">
+        <strong>左侧筛选栏</strong>
+        <span>多选后点击更新结果</span>
+      </div>
+      <form method="get" action="{{ url_for('catalog_index') }}" class="filter-form">
+        <input type="hidden" name="q" value="{{ query }}">
+        {% for group, title in [('category', '功能分类'), ('function', '控制问题'), ('flow', '流量范围'), ('pressure', '压力等级'), ('ports', '通口数'), ('cavity', '插孔型号'), ('tag', '结构特征')] %}
+        <fieldset class="filter-group">
+          <legend>{{ title }}</legend>
+          {% for value in facets[group] %}
+          <label class="filter-option">
+            <input type="checkbox" name="{{ group }}" value="{{ value }}" {% if value in selected[group] %}checked{% endif %}>
+            <span>{{ selected_label(group, value) }}</span>
+          </label>
+          {% endfor %}
+        </fieldset>
+        {% endfor %}
+        <button class="btn-app w-100" type="submit">应用筛选</button>
+        <a class="btn-ghost w-100" href="{{ url_for('catalog_index') }}">重置</a>
+      </form>
+    </aside>
+
+    <section class="result-panel">
+      <div class="result-head">
+        <div>
+          <span class="eyebrow eyebrow--accent">Results</span>
+          <h2 class="section-title">结果显示区</h2>
+        </div>
+        <div class="active-filters">
+          {% if query %}
+          <span>关键词：{{ query }}</span>
+          {% endif %}
+          {% for group, values in selected.items() %}
+            {% for value in values %}
+            <span>{{ selected_label(group, value) }}</span>
+            {% endfor %}
+          {% endfor %}
+          {% if not query and not selected.category and not selected.function and not selected.ports and not selected.cavity and not selected.flow and not selected.pressure and not selected.tag %}
+          <span>未选择筛选条件</span>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if items %}
+      <div class="catalog-table-wrap">
+        <table class="catalog-table">
+          <thead>
+            <tr>
+              <th>图例/代号</th>
+              <th>描述</th>
+              <th>SUN型号替代</th>
+              <th>流量</th>
+              <th>压力</th>
+              <th>插孔</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+            <tr>
+              <td>
+                <div class="model-cell">
+                  {{ valve_symbol(item, 'small') }}
+                  <div>
+                    <strong>{{ item.code }}</strong>
+                    <span>{{ item.category }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <strong>{{ item.title }}</strong>
+                <p>{{ item.summary }}</p>
+                <div class="tag-row">
+                  {% for tag in item.tags[:4] %}
+                  <span>{{ tag }}</span>
+                  {% endfor %}
+                </div>
+              </td>
+              <td>{{ item.sun_code }}</td>
+              <td>{{ item.flow_lpm }} L/min</td>
+              <td>{{ item.pressure_bar }} bar</td>
+              <td>{{ item.cavity }}</td>
+              <td>
+                <a class="btn-soft" href="{{ url_for('catalog_detail', model_code=item.code) }}">查看明细</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <h3>没有匹配的型号</h3>
+        <p>请减少筛选条件，或改用型号、插孔、流量范围等关键词重新搜索。</p>
+        <a class="btn-app" href="{{ url_for('catalog_index') }}">返回全部目录</a>
+      </div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}
