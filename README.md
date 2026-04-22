@@ -51,6 +51,24 @@ cp .env.example .env
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
+## 使用远程 PostgreSQL
+
+如果服务器上已经单独安装 PostgreSQL，不希望再由 Compose 启动内置 `db` 容器，可使用远程数据库部署文件：
+
+```bash
+cp .env.remote.example .env
+# 修改 DATABASE_URL、SECRET_KEY、ADMIN_PASSWORD、DEMO_PASSWORD
+docker compose -f docker-compose.remote-db.yml up -d --build
+```
+
+连接串示例：
+
+```env
+DATABASE_URL=postgresql+psycopg2://valve:<数据库密码>@101.43.113.18:5432/valve
+```
+
+如果应用容器和 PostgreSQL 安装在同一台 Linux 服务器，且数据库只监听宿主机，可把主机地址改为 `host.docker.internal`，项目的远程数据库 Compose 文件已配置 `host-gateway` 映射。
+
 ## 试用上线建议
 
 如果你想先给企业同事试用，建议直接走 Docker 部署：
@@ -124,3 +142,9 @@ deploy/nginx/yinyu990201.com.conf.example
 - 将插装阀目录从静态常量迁移为数据库表驱动，应用启动时自动种子化默认目录数据。
 - 扩展数据模型，覆盖用户、产品分类、控制功能、型号、标签、特性、应用、替代关系、型号 PDF、客户、联系人和询价。
 - 新增 `docs/05-数据结构设计文档.md` 和 `docs/06-数据库切换说明.md`。
+
+### 2026-04-22 - 远程 PostgreSQL 部署准备
+
+- 新增 `.env.remote.example`，用于连接服务器已有 PostgreSQL。
+- 新增 `docker-compose.remote-db.yml`，应用容器直接读取外部 `DATABASE_URL`，不再启动内置数据库容器。
+- 本机到 `101.43.113.18:5432` 的 TCP 连接可建立，但 `psql` 协议连接被远端关闭；远程 PostgreSQL 仍需确认监听地址、`pg_hba.conf` 和安全组/防火墙策略。

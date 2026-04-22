@@ -1,0 +1,20 @@
+services:
+  valve:
+    build:
+      context: .
+    image: valve-doc-platform:latest
+    container_name: valve-doc-platform
+    env_file:
+      - .env
+    environment:
+      PORT: "8000"
+      DATABASE_URL: "${DATABASE_URL:?set DATABASE_URL in .env}"
+      SHOW_DEMO_CREDENTIALS: "${SHOW_DEMO_CREDENTIALS:-false}"
+      SESSION_COOKIE_SECURE: "${SESSION_COOKIE_SECURE:-false}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
