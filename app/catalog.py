@@ -1,11 +1,23 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable
+
+from sqlalchemy.orm import joinedload
+
+from . import db
+from .models import (
+    ProductApplication,
+    ProductCategory,
+    ProductCrossReference,
+    ProductFeature,
+    ProductFunction,
+    ProductModel,
+    ProductTag,
+)
 
 
 @dataclass(frozen=True)
-class CatalogItem:
+class SeedCatalogItem:
     code: str
     sun_code: str
     title: str
@@ -23,27 +35,9 @@ class CatalogItem:
     applications: tuple[str, ...]
     replacement_note: str
 
-    @property
-    def flow_bucket(self) -> str:
-        if self.flow_lpm < 30:
-            return "0-30"
-        if self.flow_lpm < 60:
-            return "30-60"
-        if self.flow_lpm <= 120:
-            return "60-120"
-        return "120+"
 
-    @property
-    def pressure_bucket(self) -> str:
-        if self.pressure_bar <= 240:
-            return "240"
-        if self.pressure_bar <= 350:
-            return "350"
-        return "420"
-
-
-CATALOG_ITEMS: tuple[CatalogItem, ...] = (
-    CatalogItem(
+DEFAULT_CATALOG_ITEMS: tuple[SeedCatalogItem, ...] = (
+    SeedCatalogItem(
         code="RPEP-25",
         sun_code="RPEI",
         title="电比例溢流阀 - 无命令时最高压力设定",
@@ -61,7 +55,7 @@ CATALOG_ITEMS: tuple[CatalogItem, ...] = (
         applications=("泵站压力保护", "比例压力控制", "试验台"),
         replacement_note="用于对标 SUN RPEI 类电比例溢流阀，选型前需复核线圈、电气接口和压力范围。",
     ),
-    CatalogItem(
+    SeedCatalogItem(
         code="DTAF-28",
         sun_code="DTAF",
         title="FLeX 系列 2通直动式电磁锥阀换向阀",
@@ -79,7 +73,7 @@ CATALOG_ITEMS: tuple[CatalogItem, ...] = (
         applications=("先导控制", "卸荷回路", "紧凑阀组"),
         replacement_note="用于对标 SUN DTAF 系列，需确认常开/常闭状态与线圈电压。",
     ),
-    CatalogItem(
+    SeedCatalogItem(
         code="DTBF-34",
         sun_code="DTBF",
         title="FLeX 系列 2通直动式电磁锥阀换向阀",
@@ -97,7 +91,7 @@ CATALOG_ITEMS: tuple[CatalogItem, ...] = (
         applications=("油路切换", "旁通控制", "执行器锁止"),
         replacement_note="用于对标 SUN DTBF 系列，需按实际工况复核压降与通电状态。",
     ),
-    CatalogItem(
+    SeedCatalogItem(
         code="FDEP-120",
         sun_code="FDEP",
         title="2通直动式电比例压力补偿流量控制阀",
@@ -115,7 +109,7 @@ CATALOG_ITEMS: tuple[CatalogItem, ...] = (
         applications=("执行器速度控制", "工程机械调速", "自动化油缸"),
         replacement_note="用于对标 SUN FDEP 系列，需确认流量控制方向、插孔和线圈配置。",
     ),
-    CatalogItem(
+    SeedCatalogItem(
         code="FREL-120",
         sun_code="FREL",
         title="3通全程可调旁路/节流优先流量控制阀",
@@ -133,7 +127,7 @@ CATALOG_ITEMS: tuple[CatalogItem, ...] = (
         applications=("转向优先", "夹具速度控制", "辅助油路分配"),
         replacement_note="用于对标 SUN FREL 系列，需结合泵流量和优先口需求复核。",
     ),
-    CatalogItem(
+    SeedCatalogItem(
         code="FREP-120",
         sun_code="FREP",
         title="FLeX Series 3通电比例优先流量控制阀",
@@ -151,7 +145,7 @@ CATALOG_ITEMS: tuple[CatalogItem, ...] = (
         applications=("转向系统", "农业机械", "移动设备"),
         replacement_note="用于对标 SUN FREP 系列，需确认控制信号、阀块空间和散热条件。",
     ),
-    CatalogItem(
+    SeedCatalogItem(
         code="FNUC-40",
         sun_code="FNUC",
         title="4通3位电比例电磁操作方向阀",
@@ -169,7 +163,7 @@ CATALOG_ITEMS: tuple[CatalogItem, ...] = (
         applications=("双作用油缸", "小型执行器", "比例换向"),
         replacement_note="用于对标 SUN FNUC 系列，需复核中位机能、供电和最大工作压力。",
     ),
-    CatalogItem(
+    SeedCatalogItem(
         code="FMDF-34",
         sun_code="FMDF",
         title="电比例 3通流量控制阀 - 进口节流",
@@ -187,7 +181,7 @@ CATALOG_ITEMS: tuple[CatalogItem, ...] = (
         applications=("小型油缸调速", "辅助机构", "试验设备"),
         replacement_note="用于对标 SUN FMDF 系列，需确认 740 系列线圈和电控接口。",
     ),
-    CatalogItem(
+    SeedCatalogItem(
         code="DMBD-15",
         sun_code="DMBD",
         title="FLeX Series 3通电磁操作方向滑阀",
@@ -205,7 +199,7 @@ CATALOG_ITEMS: tuple[CatalogItem, ...] = (
         applications=("先导油路", "信号切换", "低压控制"),
         replacement_note="用于对标 SUN DMBD 系列，需复核允许内泄和中位状态。",
     ),
-    CatalogItem(
+    SeedCatalogItem(
         code="CBCA-60",
         sun_code="CBCA",
         title="3通先导开启平衡阀",
@@ -223,7 +217,7 @@ CATALOG_ITEMS: tuple[CatalogItem, ...] = (
         applications=("起重机构", "高空平台", "夹紧油缸"),
         replacement_note="用于对标 SUN CBCA 类平衡阀，需按负载压力、先导比和背压详细计算。",
     ),
-    CatalogItem(
+    SeedCatalogItem(
         code="CXJA-610",
         sun_code="CXJA",
         title="2通鼻端到侧面自由流单向阀",
@@ -241,7 +235,7 @@ CATALOG_ITEMS: tuple[CatalogItem, ...] = (
         applications=("补油回路", "旁路保护", "大流量单向隔离"),
         replacement_note="用于对标 SUN CXJA 系列，需确认流向、插孔和密封材料。",
     ),
-    CatalogItem(
+    SeedCatalogItem(
         code="RDDA-80",
         sun_code="RDDA",
         title="2通直动式溢流阀",
@@ -276,21 +270,93 @@ PRESSURE_BUCKET_LABELS = {
 }
 
 
-def all_catalog_items() -> tuple[CatalogItem, ...]:
-    return CATALOG_ITEMS
+def seed_catalog_data() -> None:
+    for index, item in enumerate(DEFAULT_CATALOG_ITEMS, start=1):
+        category = ProductCategory.query.filter_by(name=item.category).first()
+        if not category:
+            category = ProductCategory(name=item.category, sort_order=index)
+            db.session.add(category)
+
+        function = ProductFunction.query.filter_by(name=item.function).first()
+        if not function:
+            function = ProductFunction(name=item.function, sort_order=index)
+            db.session.add(function)
+
+        model = ProductModel.query.filter_by(code=item.code).first()
+        if model:
+            continue
+
+        model = ProductModel(code=item.code)
+        db.session.add(model)
+
+        model.sun_code = item.sun_code
+        model.title = item.title
+        model.category_ref = category
+        model.function_ref = function
+        model.ports = item.ports
+        model.flow_lpm = item.flow_lpm
+        model.pressure_bar = item.pressure_bar
+        model.cavity = item.cavity
+        model.structure = item.structure
+        model.symbol = item.symbol
+        model.summary = item.summary
+        model.replacement_note = item.replacement_note
+        model.status = "active"
+        model.sort_order = index
+
+        model.tag_refs = []
+        for tag_name in item.tags:
+            tag = ProductTag.query.filter_by(name=tag_name).first()
+            if not tag:
+                tag = ProductTag(name=tag_name)
+                db.session.add(tag)
+            model.tag_refs.append(tag)
+
+        model.feature_refs = [
+            ProductFeature(content=feature, sort_order=feature_index)
+            for feature_index, feature in enumerate(item.features, start=1)
+        ]
+        model.application_refs = [
+            ProductApplication(name=application, sort_order=application_index)
+            for application_index, application in enumerate(item.applications, start=1)
+        ]
+        model.cross_references = [
+            ProductCrossReference(
+                source_system="SUN",
+                source_code=item.sun_code,
+                note=item.replacement_note,
+                confidence_level="reference",
+                status="active",
+            )
+        ]
+
+    db.session.commit()
 
 
-def get_catalog_item(code: str) -> CatalogItem | None:
+def _catalog_query():
+    return (
+        ProductModel.query.filter_by(status="active")
+        .options(
+            joinedload(ProductModel.category_ref),
+            joinedload(ProductModel.function_ref),
+            joinedload(ProductModel.tag_refs),
+            joinedload(ProductModel.feature_refs),
+            joinedload(ProductModel.application_refs),
+        )
+        .order_by(ProductModel.sort_order.asc(), ProductModel.code.asc())
+    )
+
+
+def all_catalog_items() -> tuple[ProductModel, ...]:
+    return tuple(_catalog_query().all())
+
+
+def get_catalog_item(code: str) -> ProductModel | None:
     normalized = code.strip().upper()
-    return next((item for item in CATALOG_ITEMS if item.code == normalized), None)
+    return _catalog_query().filter(ProductModel.code == normalized).first()
 
 
-def _contains_any(values: Iterable[str], needle: str) -> bool:
-    target = needle.lower()
-    return any(target in value.lower() for value in values)
-
-
-def filter_catalog(args) -> tuple[list[CatalogItem], dict[str, list[str]], str]:
+def filter_catalog(args) -> tuple[list[ProductModel], dict[str, list[str]], str]:
     selected = {
         "category": [value for value in args.getlist("category") if value],
         "function": [value for value in args.getlist("function") if value],
@@ -303,15 +369,17 @@ def filter_catalog(args) -> tuple[list[CatalogItem], dict[str, list[str]], str]:
     query = args.get("q", "").strip()
     sort = args.get("sort", "default")
 
-    items = list(CATALOG_ITEMS)
+    items = list(all_catalog_items())
     if query:
+        normalized_query = query.lower()
         items = [
             item
             for item in items
-            if query.lower() in " ".join(
+            if normalized_query
+            in " ".join(
                 (
                     item.code,
-                    item.sun_code,
+                    item.sun_code or "",
                     item.title,
                     item.category,
                     item.function,
@@ -350,7 +418,7 @@ def filter_catalog(args) -> tuple[list[CatalogItem], dict[str, list[str]], str]:
 
 
 def facet_values() -> dict[str, list[str]]:
-    items = CATALOG_ITEMS
+    items = all_catalog_items()
     tags = sorted({tag for item in items for tag in item.tags})
     return {
         "category": sorted({item.category for item in items}),

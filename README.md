@@ -11,7 +11,8 @@
   - 管理员：资料上传/删除、客户新增/编辑/删除。
   - 普通用户：资料查看/预览/下载、客户查看。
 - **客户管理**：含基础客户档案（可后续扩展更多字段和业务流程）。
-- **可云端部署**：提供 Docker 部署方式，可直接在云服务器运行。
+- **PostgreSQL 数据库**：生产部署使用 PostgreSQL，目录、附件、客户和询价扩展均由数据库承载。
+- **可云端部署**：提供 Docker + PostgreSQL 部署方式，可直接在云服务器运行。
 
 ## 快速启动（本地）
 
@@ -20,6 +21,14 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+如果只想本地用 Python 启动应用，则先启动 PostgreSQL，并把 `.env` 中的 `DATABASE_URL` 改为 `localhost`：
+
+```bash
+docker compose -f docker-compose.prod.yml up -d db
+# DATABASE_URL=postgresql+psycopg2://valve:valve-password@localhost:5432/valve
 python run.py
 ```
 
@@ -38,12 +47,8 @@ python -m unittest discover -s tests -p "test_*.py" -v
 ## Docker 启动
 
 ```bash
-docker build -t valve-doc-platform .
-docker run -d --name valve-doc-platform \
-  -p 8000:8000 \
-  -v $(pwd)/data:/app/data \
-  --env-file .env \
-  valve-doc-platform
+cp .env.example .env
+docker compose -f docker-compose.prod.yml up -d --build
 ```
 
 ## 试用上线建议
@@ -97,6 +102,8 @@ deploy/nginx/yinyu990201.com.conf.example
 - 体系架构设计文档：`docs/02-体系架构设计文档.md`
 - 应用部署文档：`docs/03-应用部署文档.md`
 - 重构更新日志：`docs/04-重构更新日志.md`
+- 数据结构设计文档：`docs/05-数据结构设计文档.md`
+- 数据库切换说明：`docs/06-数据库切换说明.md`
 
 ## 更新日志
 
@@ -110,3 +117,10 @@ deploy/nginx/yinyu990201.com.conf.example
 - PDF 上传、预览、下载和删除整合到插装阀型号明细页；旧资料路由保留为跳转兼容。
 - 保留客户档案、登录权限、Docker、Nginx 和健康检查能力。
 - 新增 `tests/test_app.py`，覆盖目录、明细、解决方案、替代查询、询价预填、PDF 上传和普通用户权限。
+
+### 2026-04-22 - PostgreSQL 与后端数据层重构
+
+- 将生产数据库切换为 PostgreSQL，并在 `docker-compose.prod.yml` 中新增 `db` 服务。
+- 将插装阀目录从静态常量迁移为数据库表驱动，应用启动时自动种子化默认目录数据。
+- 扩展数据模型，覆盖用户、产品分类、控制功能、型号、标签、特性、应用、替代关系、型号 PDF、客户、联系人和询价。
+- 新增 `docs/05-数据结构设计文档.md` 和 `docs/06-数据库切换说明.md`。

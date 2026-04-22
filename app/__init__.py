@@ -24,7 +24,10 @@ def create_app() -> Flask:
     project_root = Path(app.root_path).parent.resolve()
     data_dir = project_root / "data"
     upload_dir = data_dir / "uploads"
-    default_db_uri = f"sqlite:///{(data_dir / 'app.db').as_posix()}"
+    default_db_uri = os.getenv(
+        "DEFAULT_DATABASE_URL",
+        "postgresql+psycopg2://valve:valve-password@localhost:5432/valve",
+    )
 
     load_dotenv(project_root / ".env")
 
@@ -61,12 +64,14 @@ def create_app() -> Flask:
         return {"status": "ok"}, 200
 
     from . import models
+    from .catalog import seed_catalog_data
     from .routes import register_routes
 
     with app.app_context():
         db.create_all()
-        models.ensure_document_model_code_column()
+        models.ensure_legacy_schema_compatibility()
         models.ensure_default_admin()
+        seed_catalog_data()
 
     register_routes(app)
     return app

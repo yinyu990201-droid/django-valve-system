@@ -50,7 +50,7 @@ def _validate_pdf_upload(file):
     return secure_filename(file.filename)
 
 
-def _create_document_from_request(model_code: str | None = None):
+def _create_document_from_request(model_code: str | None = None, product_model_id: int | None = None):
     title = request.form.get("title", "").strip()
     description = request.form.get("description", "").strip()
     file = request.files.get("pdf_file")
@@ -66,6 +66,7 @@ def _create_document_from_request(model_code: str | None = None):
     file.save(target_path)
 
     doc = Document(
+        product_model_id=product_model_id,
         model_code=model_code,
         title=title,
         original_filename=original_name,
@@ -178,7 +179,7 @@ def register_routes(app):
         item = get_catalog_item(model_code)
         if not item:
             abort(404)
-        doc = _create_document_from_request(model_code=item.code)
+        doc = _create_document_from_request(model_code=item.code, product_model_id=item.id)
         if doc:
             flash("型号资料上传成功", "success")
         return redirect(url_for("catalog_detail", model_code=item.code))
@@ -232,7 +233,10 @@ def register_routes(app):
         if request.method == "POST":
             model_code = request.form.get("model_code", "").strip().upper()
             item = get_catalog_item(model_code) if model_code else None
-            doc = _create_document_from_request(model_code=item.code if item else None)
+            doc = _create_document_from_request(
+                model_code=item.code if item else None,
+                product_model_id=item.id if item else None,
+            )
             if doc:
                 flash("资料上传成功", "success")
                 if item:

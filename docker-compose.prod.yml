@@ -1,4 +1,20 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: valve-postgres
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB:-valve}"
+      POSTGRES_USER: "${POSTGRES_USER:-valve}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-valve-password}"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-valve} -d ${POSTGRES_DB:-valve}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   valve:
     build:
       context: .
@@ -8,10 +24,17 @@ services:
       - .env
     environment:
       PORT: "8000"
+      DATABASE_URL: "postgresql+psycopg2://${POSTGRES_USER:-valve}:${POSTGRES_PASSWORD:-valve-password}@db:5432/${POSTGRES_DB:-valve}"
       SHOW_DEMO_CREDENTIALS: "false"
       SESSION_COOKIE_SECURE: "false"
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
       - ./data:/app/data
     restart: unless-stopped
+
+volumes:
+  pgdata:
